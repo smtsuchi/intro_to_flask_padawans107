@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+    <h1>All Posts</h1>
+
+    {% for post in posts %}
+        <a class="card text-dark text-decoration-none" style="width: 18rem;" href="{{ url_for('getPost', post_id=post.id) }}">
+            <img src="{{ post.img_url }}" class="card-img-top" alt="{{ post.title }}">
+            <div class="card-body">
+            <h5 class="card-title">{{ post.title }} - {{ post.author.username }}</h5>
+            <p class="card-text">{{ post.caption }}</p>
+            </div>
+        </a>
+    {% endfor %}
+
+
+{% endblock %}
