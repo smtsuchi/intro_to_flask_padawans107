@@ -1,7 +1,8 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from ..models import User
 from .forms import UserCreationForm, LoginForm
 from flask_login import login_user, logout_user, login_required
+
 
 auth = Blueprint('auth', __name__, template_folder='auth_templates')
 
@@ -16,15 +17,14 @@ def signUpPage():
             email = form.email.data
             password = form.password.data
             
-            print(username, email, password)
+
 
             # add user to database
             user = User(username, email, password)
-            print(user)
 
             user.saveToDB()
 
-            return redirect(url_for('contactPage'))
+            return redirect(url_for('auth.loginPage'))
 
 
     return render_template('signup.html', form = form )
@@ -44,12 +44,14 @@ def loginPage():
                 #if user ecxists, check if passwords match
                 if user.password == password:
                     login_user(user)
+                    flash(f'Successfully logged in! Welcome back {user.username}', category='success')                    
+                    return redirect(url_for('getPosts'))
 
                 else:
-                    print('wrong password')
+                    flash('wrong password', category='danger')
 
             else:
-                print('user doesnt exist')
+                flash('user doesnt exist', category='danger')
 
 
 
@@ -59,4 +61,4 @@ def loginPage():
 @login_required
 def logoutRoute():
     logout_user()
-    return redirect(url_for('loginPage'))
+    return redirect(url_for('auth.loginPage'))

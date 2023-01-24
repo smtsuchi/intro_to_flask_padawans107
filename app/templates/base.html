@@ -17,6 +17,18 @@
 
     <img src="{{ url_for('static', filename='ig_logo.png') }}" alt="logo">
     {% include 'nav.html' %}
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            {% for c, m in messages %}
+                <div class="alert alert-{{ c }} alert-dismissible fade show" role="alert">
+                    {{ m }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+
 
     <div class="justify-content-center">
         {% block content %}
