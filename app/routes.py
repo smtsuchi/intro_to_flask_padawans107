@@ -1,8 +1,12 @@
 from app import app
 from flask import render_template, request, redirect, url_for
-from .forms import PostForm
+from .forms import PostForm, SearchForm
 from .models import Post, Likes, User
 from flask_login import current_user, login_required
+import requests
+import os
+
+NEWS_API_KEY = os.environ.get('NEWS_API_KEY')
 
 @app.route('/')
 def homePage():
@@ -123,3 +127,36 @@ def unfollowUser(user_id):
     person = User.query.get(user_id)
     current_user.unfollow(person)
     return redirect(url_for('contactPage'))
+
+
+
+@app.route('/news', methods = ["GET", "POST"])
+def newsPage():
+    my_form = SearchForm()
+    
+    if request.method == "POST":
+        if my_form.validate():
+            search_term = my_form.shoha.data
+            url = f'https://newsapi.org/v2/everything?q={search_term}&apiKey={NEWS_API_KEY}&pageSize=20'
+            result = requests.get(url)
+
+            data = result.json()
+            
+            articles = data['articles']
+            return render_template('news.html', html_form = my_form, articles = articles)
+
+    return render_template('news.html', html_form = my_form)
+
+
+@app.route('/test', methods = ["GET", "POST"])
+def testFunction():
+   
+    
+    
+    posts = Post.query.all()
+    posts = [p.to_dict() for p in posts]
+    
+    
+
+    return render_template('test.html', posts=posts)
+

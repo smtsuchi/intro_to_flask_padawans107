@@ -10,3 +10,10 @@ class PostForm(FlaskForm):
     caption = StringField("Caption", validators = [])
     
     submit = SubmitField()
+
+
+class SearchForm(FlaskForm):
+    shoha = StringField('ANYTHING CAN GO HERE', validators=[DataRequired()])
+
+    send_it = SubmitField()
+

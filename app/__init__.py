@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 
 from .auth.routes import auth
+from .api.routes import api
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -21,6 +22,7 @@ def load_user(user_id):
 
 
 app.register_blueprint(auth)
+app.register_blueprint(api)
 
 
 
