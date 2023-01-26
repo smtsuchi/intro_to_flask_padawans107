@@ -1,6 +1,27 @@
 from flask import request
 from .models import User
 import base64
+from werkzeug.security import check_password_hash
+from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
+
+basic_auth = HTTPBasicAuth()
+token_auth = HTTPTokenAuth()
+
+@basic_auth.verify_password
+def verifyPassword(username, password):
+    user = User.query.filter_by(username=username).first()
+    if user:
+        if check_password_hash(user.password, password):
+            return user
+
+@token_auth.verify_token
+def verifyToken(token):
+    user = User.query.filter_by(apitoken=token).first()
+    if user:
+        return user
+    
+
+
 
 def basic_auth_required(func):
 

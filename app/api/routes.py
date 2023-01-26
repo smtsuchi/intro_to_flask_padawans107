@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from ..models import Post
-from ..apiauthhelper import basic_auth_required, token_auth_required
+from ..apiauthhelper import basic_auth_required, token_auth_required, basic_auth
 
 api = Blueprint('api', __name__)
 
