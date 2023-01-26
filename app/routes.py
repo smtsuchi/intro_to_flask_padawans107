@@ -30,7 +30,6 @@ def contactPage():
 
 
 
-
 @app.route('/posts/create', methods=["GET","POST"])
 @login_required
 def createPost():
