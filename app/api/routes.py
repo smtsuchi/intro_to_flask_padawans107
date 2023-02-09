@@ -1,7 +1,7 @@
 from flask import Blueprint, request
-from ..models import Post
+from ..models import Post, Likes, User
 from ..apiauthhelper import basic_auth_required, token_auth_required, basic_auth
-
+from flask_cors import cross_origin
 api = Blueprint('api', __name__)
 
 
@@ -34,6 +34,16 @@ def getPost(post_id):
             'status': 'not ok',
             'message': 'The post you are looking for does not exist.'
         }
+
+@api.route('/api/like/<int:post_id>', methods=["GET"])
+def likePost(user, post_id):
+    like_instance = Likes(user.id, post_id)
+    like_instance.saveToDB()    
+    return {
+        'status': 'ok',
+        'msg': 'succefully liked post'
+    }
+
 
 @api.route('/api/posts/create', methods = ["POST"])
 @token_auth_required
@@ -76,3 +86,36 @@ def createPost(user):
 #         'status': 'ok',
 #         'message': 'Succesfullly created post!'
 #     }
+
+
+################# AUTH ROUTES API  #############
+@api.route('/api/signup', methods=["POST"])
+def signUpPageAPI():
+    data = request.json
+   
+       
+    username = data['username']
+    email = data['email']
+    password = data['password']
+    
+
+
+    # add user to database
+    user = User(username, email, password)
+
+    user.saveToDB()
+
+    return {
+        'status': 'ok',
+        'message': "Succesffuly created an account!"
+    }
+
+@api.route('/api/login', methods=["POST"])
+@basic_auth.login_required
+def getToken():
+    user = basic_auth.current_user()
+    return {
+        'status': 'ok',
+        'user': user.to_dict(),
+    }
+    
