@@ -57,19 +57,21 @@ def basic_auth_required(func):
                 'status': 'not ok',
                 'message': 'That username does not belong to a valid account.'
             }
-        
+    decorated.__name__ = func.__name__  
     return decorated
 
 
 def token_auth_required(func):
 
     def decorated(*args, **kwargs):
+        print('hi, trigger me')
         #before:
         if 'Authorization' in request.headers:
             val = request.headers['Authorization']
     
             token =val.split()[1]
         else:
+            print(request.headers)
             return {
                 'status': 'not ok',
                 'message': "Please add an Authorization Header with the Token Auth format."
@@ -84,5 +86,5 @@ def token_auth_required(func):
                 'status': 'not ok',
                 'message': 'That token does not belong to a valid account.'
             }
-        
+    decorated.__name__ = func.__name__
     return decorated

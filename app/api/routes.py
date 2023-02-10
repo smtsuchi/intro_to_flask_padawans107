@@ -1,13 +1,13 @@
 from flask import Blueprint, request
 from ..models import Post, Likes, User
-from ..apiauthhelper import basic_auth_required, token_auth_required, basic_auth
+from ..apiauthhelper import basic_auth_required, token_auth_required, basic_auth, token_auth
 from flask_cors import cross_origin
 api = Blueprint('api', __name__)
 
 
 @api.route('/api/posts')
 def getPosts():
-    posts = Post.query.all()
+    posts = Post.query.order_by(Post.date_created.desc()).all()
 
     new_posts = []
     for p in posts:
@@ -26,8 +26,7 @@ def getPost(post_id):
         return {
             'status': 'ok',
             'totalResults': 1,
-            'post': 
-            post.to_dict()
+            'post': post.to_dict()
         }
     else:
         return {
@@ -66,26 +65,54 @@ def createPost(user):
         'message': 'Succesfullly created post!'
     }
 
-# @api.route('/api/posts/update/<post_id>', methods = ["POST"])
-# @basic_auth_required
-# def updatePost(user, post_id):
-#     data = request.json
+@api.route('/api/posts/<int:post_id>/delete', methods=["GET"])
+@token_auth_required
+def deletePostAPI(user, post_id):
+    print('passed token auth')
+    post = Post.query.get(post_id)
+    # user = token_auth.current_user()
+    if user.id != post.author.id:
+        return {
+            'status': 'not ok',
+            'message': 'You cannot delete another users posts'
+        }
+    print(post)
+    post.deleteFromDB()
+    return {
+        'status': 'ok',
+        'message': 'Succesfully deleted post!'
+    }
 
-#     title = data['title']
-#     caption = data['caption']
-#     img_url = data['img_url']
+@api.route('/api/posts/update/<post_id>', methods = ["POST"])
+@token_auth_required
+def updatePost(user, post_id):
+    data = request.json
 
-#     ## for now, accept the user_id parameter from the JSON body
-#     ### HOWEVER, this is not the correct way, we need to authenticate them somehow
-#     #### we will cover this in BASIC/TOKEN auth
+    title = data['title']
+    caption = data['caption']
+    img_url = data['img_url']
 
-#     post = Post(title, img_url, caption, user.id)
-#     post.saveToDB()
+    ## for now, accept the user_id parameter from the JSON body
+    ### HOWEVER, this is not the correct way, we need to authenticate them somehow
+    #### we will cover this in BASIC/TOKEN auth
+
+    post = Post.query.get(post_id)
+    if user.id != post.author.id:
+        return {
+            'status': 'not ok',
+            'message': 'You cannot update another users Post'
+        }
+
+    post.title = title
+    post.caption = caption
+    post.img_url = img_url
+   
+    post.saveChanges()
     
-#     return {
-#         'status': 'ok',
-#         'message': 'Succesfullly created post!'
-#     }
+    return {
+        'status': 'ok',
+        'message': 'Succesfullly updated post!'
+    }
 
 
 ################# AUTH ROUTES API  #############

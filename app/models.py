@@ -21,6 +21,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String, nullable=False)
     apitoken = db.Column(db.String)
     post = db.relationship("Post", backref='author', lazy=True)
+    likes = db.relationship("Likes", lazy=True, cascade="all, delete")
     followed = db.relationship("User",
         primaryjoin = (followers.c.follower_id == id),
         secondaryjoin = (followers.c.followed_id == id),
@@ -61,7 +62,7 @@ class Post(db.Model):
     caption = db.Column(db.String(1000))
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    likes = db.relationship("Likes", lazy=True)
+    likes = db.relationship("Likes", lazy=True, cascade="all, delete")
 
     def __init__(self, title, img_url, caption, user_id):
         self.title = title
@@ -96,8 +97,8 @@ class Post(db.Model):
 
 class Likes(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'), nullable=False)
 
     def __init__(self, user_id, post_id):
         self.user_id = user_id
