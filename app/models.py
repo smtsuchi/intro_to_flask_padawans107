@@ -22,6 +22,7 @@ class User(db.Model, UserMixin):
     apitoken = db.Column(db.String)
     post = db.relationship("Post", backref='author', lazy=True)
     likes = db.relationship("Likes", lazy=True, cascade="all, delete")
+    cart = db.relationship("Cart", lazy=True, cascade="all, delete")
     followed = db.relationship("User",
         primaryjoin = (followers.c.follower_id == id),
         secondaryjoin = (followers.c.followed_id == id),
@@ -93,6 +94,20 @@ class Post(db.Model):
             'like_counter': len(self.likes)
         }
 
+class Cart(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id', ondelete='CASCADE'), nullable=False)
+
+    def __init__(self, user_id, product_id):
+        self.user_id = user_id
+        self.product_id = product_id
+    def saveToDB(self):
+        db.session.add(self)
+        db.session.commit()
+    def deleteFromDB(self):
+        db.session.delete(self)
+        db.session.commit()
 
 
 class Likes(db.Model):
@@ -109,4 +124,40 @@ class Likes(db.Model):
     def deleteFromDB(self):
         db.session.delete(self)
         db.session.commit()
+
+
+
+
+class Product(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_name = db.Column(db.String(100), nullable=False)
+    img_url = db.Column(db.String, nullable=False)
+    description = db.Column(db.String(1000))
+    price = db.Column(db.Numeric(10,2))
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
+    
+
+    def __init__(self, product_name, img_url, description, price):
+        self.product_name = product_name
+        self.img_url = img_url
+        self.description = description
+        self.price = price
+
+    def saveToDB(self):
+        db.session.add(self)
+        db.session.commit()
+    def saveChanges(self):
+        db.session.commit()
+    def deleteFromDB(self):
+        db.session.delete(self)
+        db.session.commit()
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'product_name': self.product_name,
+            'img_url': self.img_url,
+            'description': self.description,
+            'date_created': self.date_created,
+            'price': self.price
+        }
 
